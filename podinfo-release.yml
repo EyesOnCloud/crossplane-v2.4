@@ -1,0 +1,20 @@
+apiVersion: helm.m.crossplane.io/v1beta1
+kind: Release
+metadata:
+  name: podinfo
+  namespace: web-team
+spec:
+  forProvider:
+    namespace: web-team
+    chart:
+      name: podinfo
+      repository: https://stefanprodan.github.io/podinfo
+      version: 6.16.0
+    values:
+      replicaCount: 3
+      ui:
+        message: "Welcome to the Web Team portal"
+        color: "#34577c"
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
