@@ -1,0 +1,18 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: team-orders-namespace
+  namespace: platform-objects
+spec:
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: team-orders
+        labels:
+          team: orders
+          managed-by: crossplane
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: in-cluster
