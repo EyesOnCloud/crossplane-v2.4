@@ -1,0 +1,21 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: orders-settings-configmap
+  namespace: platform-objects
+spec:
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: orders-settings
+        namespace: team-orders
+        labels:
+          team: orders
+      data:
+        LOG_LEVEL: info
+        CHECKOUT_FEATURE: disabled
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: in-cluster
