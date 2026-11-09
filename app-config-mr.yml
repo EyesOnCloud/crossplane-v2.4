@@ -1,0 +1,22 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: payments-app-config
+  namespace: payments-dev
+spec:
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: payments-app-config
+        namespace: payments-dev
+        labels:
+          app: payments
+      data:
+        APP_ENV: dev
+        LOG_LEVEL: debug
+        FEATURE_NEW_CHECKOUT: "true"
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: in-cluster
