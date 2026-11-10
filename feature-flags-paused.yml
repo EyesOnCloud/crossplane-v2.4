@@ -1,0 +1,19 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: billing-feature-flags
+  namespace: ops-team
+spec:
+  managementPolicies: []
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: billing-feature-flags
+        namespace: ops-team
+      data:
+        ENABLE_NEW_INVOICE: "false"
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: in-cluster
