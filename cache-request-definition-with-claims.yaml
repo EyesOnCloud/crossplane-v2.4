@@ -1,0 +1,46 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: cacherequests.cache.platform.example.com
+spec:
+  scope: Namespaced
+  group: cache.platform.example.com
+  names:
+    kind: CacheRequest
+    plural: cacherequests
+  claimNames:
+    kind: CacheClaim
+    plural: cacheclaims
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      additionalPrinterColumns:
+        - name: TIER
+          type: string
+          jsonPath: .spec.tier
+        - name: MEMORY-MB
+          type: integer
+          jsonPath: .spec.memoryMB
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: A request for an in-memory cache.
+          properties:
+            spec:
+              type: object
+              required:
+                - tier
+              properties:
+                tier:
+                  type: string
+                  description: Service tier.
+                  enum:
+                    - basic
+                    - standard
+                memoryMB:
+                  type: integer
+                  description: Cache memory in MB, 256 to 4096.
+                  minimum: 256
+                  maximum: 4096
+                  default: 512
