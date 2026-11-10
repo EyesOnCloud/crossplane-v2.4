@@ -1,0 +1,68 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: webservices.platform.example.com
+spec:
+  scope: Namespaced
+  group: platform.example.com
+  names:
+    kind: WebService
+    plural: webservices
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      additionalPrinterColumns:
+        - name: IMAGE
+          type: string
+          jsonPath: .spec.image
+        - name: ENVIRONMENT
+          type: string
+          jsonPath: .spec.environment
+        - name: REPLICAS
+          type: integer
+          jsonPath: .spec.replicas
+      schema:
+        openAPIV3Schema:
+          type: object
+          description: A web service request from an application team.
+          properties:
+            spec:
+              type: object
+              description: Settings the application team controls.
+              required:
+                - image
+                - team
+              x-kubernetes-validations:
+                - rule: "self.environment != 'production' || self.replicas >= 2"
+                  message: "production web services must run at least 2 replicas"
+              properties:
+                image:
+                  type: string
+                  minLength: 1
+                  description: Container image, for example nginx:1.27.
+                team:
+                  type: string
+                  pattern: "^[a-z0-9-]+$"
+                  maxLength: 40
+                  description: Owning team, lowercase letters, digits and hyphens.
+                environment:
+                  type: string
+                  enum:
+                    - dev
+                    - staging
+                    - production
+                  default: dev
+                  description: Target environment.
+                replicas:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  default: 1
+                  description: Number of running copies.
+                port:
+                  type: integer
+                  minimum: 1024
+                  maximum: 65535
+                  default: 8080
+                  description: Port the container listens on.
