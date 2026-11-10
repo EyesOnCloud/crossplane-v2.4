@@ -6,7 +6,6 @@ metadata:
 spec:
   managementPolicies:
     - Observe
-    - Update
   forProvider:
     manifest:
       apiVersion: v1
