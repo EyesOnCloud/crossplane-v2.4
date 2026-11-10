@@ -1,0 +1,20 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: orders-api-settings
+  namespace: orders-platform
+spec:
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: orders-api-settings
+        namespace: orders-platform
+      data:
+        ORDERS_DB_HOST: orders-db.internal
+        ORDERS_DB_PORT: "5432"
+        ORDERS_CACHE_TTL_SECONDS: "300"
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: orders-platform
