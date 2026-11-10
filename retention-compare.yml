@@ -1,0 +1,42 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: billing-feature-flags
+  namespace: ops-team
+spec:
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: billing-feature-flags
+        namespace: ops-team
+      data:
+        ENABLE_NEW_INVOICE: "false"
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: in-cluster
+---
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: billing-audit-config
+  namespace: ops-team
+spec:
+  managementPolicies:
+    - Observe
+    - Create
+    - Update
+    - LateInitialize
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: billing-audit-config
+        namespace: ops-team
+      data:
+        AUDIT_RETENTION_DAYS: "365"
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: in-cluster
