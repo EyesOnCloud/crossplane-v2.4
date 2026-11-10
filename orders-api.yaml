@@ -1,0 +1,32 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: orders-api
+  namespace: orders-platform
+spec:
+  forProvider:
+    manifest:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: orders-api
+        namespace: orders-platform
+      spec:
+        replicas: 2
+        selector:
+          matchLabels:
+            app: orders-api
+        template:
+          metadata:
+            labels:
+              app: orders-api
+          spec:
+            containers:
+              - name: orders-api
+                image: nginx:1.27
+                envFrom:
+                  - configMapRef:
+                      name: orders-api-settings
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: orders-platform
