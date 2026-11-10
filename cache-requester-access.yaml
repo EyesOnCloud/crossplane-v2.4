@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: payments-developer
+  namespace: payments
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cache-requester
+  namespace: payments
+rules:
+  - apiGroups:
+      - cache.platform.example.com
+    resources:
+      - cacherequests
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: payments-developer-cache-requester
+  namespace: payments
+subjects:
+  - kind: ServiceAccount
+    name: payments-developer
+    namespace: payments
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cache-requester
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: inventory-developer
+  namespace: inventory
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: cache-requester
+  namespace: inventory
+rules:
+  - apiGroups:
+      - cache.platform.example.com
+    resources:
+      - cacherequests
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: inventory-developer-cache-requester
+  namespace: inventory
+subjects:
+  - kind: ServiceAccount
+    name: inventory-developer
+    namespace: inventory
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: cache-requester
