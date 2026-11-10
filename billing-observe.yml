@@ -1,0 +1,21 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: legacy-billing-config
+  namespace: ops-team
+spec:
+  managementPolicies:
+    - Observe
+    - Update
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: legacy-billing-config
+        namespace: ops-team
+      data:
+        DB_POOL_SIZE: "20"
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: in-cluster
