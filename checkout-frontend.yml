@@ -1,0 +1,8 @@
+apiVersion: platform.example.com/v1alpha1
+kind: WebService
+metadata:
+  name: checkout-frontend
+  namespace: checkout-team
+spec:
+  image: nginx:1.27
+  team: checkout
