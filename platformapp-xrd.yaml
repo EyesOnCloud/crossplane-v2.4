@@ -1,0 +1,38 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: platformapps.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: PlatformApp
+    plural: platformapps
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              appName:
+                type: string
+                description: Name of the application.
+                maxLength: 40
+                pattern: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
+              environment:
+                type: string
+                description: Target environment. Decides replicas, log level and memory.
+                enum:
+                - development
+                - production
+                x-kubernetes-validations:
+                - rule: self == oldSelf
+                  message: environment cannot be changed after creation.
+            required:
+            - appName
+            - environment
