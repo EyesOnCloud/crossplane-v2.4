@@ -1,0 +1,87 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: platformapp-environment-aware
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.org/v1alpha1
+    kind: PlatformApp
+  mode: Pipeline
+  pipeline:
+  # Step 1: select the EnvironmentConfig
+  - step: select-environment
+    functionRef:
+      name: function-environment-configs
+    input:
+      apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+      kind: Input
+      spec:
+        environmentConfigs:
+        - type: Selector
+          selector:
+            mode: Single
+            matchLabels:
+            - key: platform.example.org/environment
+              type: FromCompositeFieldPath
+              valueFromFieldPath: spec.environment
+  # Step 2: use the selected values
+  - step: compose-deployment
+    functionRef:
+      name: function-patch-and-transform
+    input:
+      apiVersion: pt.fn.crossplane.io/v1beta1
+      kind: Resources
+      resources:
+      - name: app-deployment
+        base:
+          apiVersion: apps/v1
+          kind: Deployment
+          spec:
+            replicas: 1
+            template:
+              spec:
+                containers:
+                - name: web
+                  image: nginx:1.28
+                  ports:
+                  - containerPort: 80
+                  env:
+                  - name: LOG_LEVEL
+                    value: info
+                  resources:
+                    limits:
+                      memory: 128Mi
+        patches:
+        # Values from the XR
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: metadata.name
+          transforms:
+          - type: string
+            string:
+              type: Format
+              fmt: "%s-deployment"
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.selector.matchLabels.app
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.template.metadata.labels.app
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.environment
+          toFieldPath: metadata.labels[platform.example.org/environment]
+        # Values from the selected EnvironmentConfig
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: replicas
+          toFieldPath: spec.replicas
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: logLevel
+          toFieldPath: spec.template.spec.containers[0].env[0].value
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: memoryLimit
+          toFieldPath: spec.template.spec.containers[0].resources.limits.memory
+        readinessChecks:
+        - type: MatchCondition
+          matchCondition:
+            type: Available
+            status: "True"
