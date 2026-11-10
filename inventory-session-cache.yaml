@@ -1,0 +1,7 @@
+apiVersion: cache.platform.example.com/v1alpha1
+kind: CacheRequest
+metadata:
+  name: session-cache
+  namespace: inventory
+spec:
+  tier: basic
