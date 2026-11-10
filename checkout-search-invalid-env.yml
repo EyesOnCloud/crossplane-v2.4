@@ -1,0 +1,9 @@
+apiVersion: platform.example.com/v1alpha1
+kind: WebService
+metadata:
+  name: checkout-search
+  namespace: checkout-team
+spec:
+  image: nginx:1.27
+  team: checkout
+  environment: qa
