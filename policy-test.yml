@@ -1,0 +1,18 @@
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: Object
+metadata:
+  name: policy-test
+  namespace: ops-team
+spec:
+  managementPolicies:
+    - Read
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: policy-test
+        namespace: ops-team
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: in-cluster
