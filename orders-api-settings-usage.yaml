@@ -1,0 +1,16 @@
+apiVersion: protection.crossplane.io/v1beta1
+kind: Usage
+metadata:
+  name: orders-api-uses-settings
+  namespace: orders-platform
+spec:
+  of:
+    apiVersion: kubernetes.m.crossplane.io/v1alpha1
+    kind: Object
+    resourceRef:
+      name: orders-api-settings
+  by:
+    apiVersion: kubernetes.m.crossplane.io/v1alpha1
+    kind: Object
+    resourceRef:
+      name: orders-api
