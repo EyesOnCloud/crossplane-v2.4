@@ -1,0 +1,11 @@
+apiVersion: protection.crossplane.io/v1beta1
+kind: ClusterUsage
+metadata:
+  name: protect-orders-platform-provider-config
+spec:
+  of:
+    apiVersion: kubernetes.m.crossplane.io/v1alpha1
+    kind: ClusterProviderConfig
+    resourceRef:
+      name: orders-platform
+  reason: "Shared identity for all Orders platform resources - remove this ClusterUsage before decommissioning"
