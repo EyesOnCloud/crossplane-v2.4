@@ -1,0 +1,9 @@
+apiVersion: platform.example.org/v1alpha1
+kind: StandardApp
+metadata:
+  name: payments-api
+  namespace: business-apps
+spec:
+  appName: payments-api
+  crossplane:
+    compositionUpdatePolicy: Manual
