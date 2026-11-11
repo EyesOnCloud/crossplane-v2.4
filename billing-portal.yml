@@ -1,0 +1,9 @@
+apiVersion: platform.example.org/v1alpha1
+kind: WebService
+metadata:
+  name: billing-portal
+  namespace: finance-team
+spec:
+  appName: billing-portal
+  team: finance
+  size: medium
