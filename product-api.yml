@@ -1,0 +1,9 @@
+apiVersion: platform.example.org/v1alpha1
+kind: WebService
+metadata:
+  name: product-api
+  namespace: catalog-team
+spec:
+  appName: product-api
+  team: catalog
+  size: small
