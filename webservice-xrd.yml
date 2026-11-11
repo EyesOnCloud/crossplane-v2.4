@@ -1,0 +1,60 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: webservices.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: WebService
+    plural: webservices
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              appName:
+                type: string
+                description: Name of the application. Used to name the Deployment and Service.
+                maxLength: 40
+                pattern: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
+                x-kubernetes-validations:
+                - rule: self == oldSelf
+                  message: appName cannot be changed after creation.
+              team:
+                type: string
+                description: Team that owns the application. Used for cost tracking.
+                maxLength: 20
+                pattern: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
+              size:
+                type: string
+                description: Application size. small = 1 pod, medium = 2 pods, large = 3 pods.
+                enum:
+                - small
+                - medium
+                - large
+              imageTag:
+                type: string
+                description: Approved nginx version. Optional. Platform default is 1.27.
+                enum:
+                - "1.27"
+                - "1.28"
+            required:
+            - appName
+            - team
+            - size
+          status:
+            type: object
+            properties:
+              availableReplicas:
+                type: integer
+                description: Number of application pods that are available.
+              url:
+                type: string
+                description: Address to reach the application inside the cluster.
