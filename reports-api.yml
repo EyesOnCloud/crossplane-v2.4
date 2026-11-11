@@ -1,0 +1,9 @@
+apiVersion: platform.example.org/v1alpha1
+kind: StandardApp
+metadata:
+  name: reports-api
+  namespace: business-apps
+spec:
+  appName: reports-api
+  crossplane:
+    compositionUpdatePolicy: Automatic
