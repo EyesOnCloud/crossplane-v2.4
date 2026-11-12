@@ -1,0 +1,10 @@
+apiVersion: apiextensions.crossplane.io/v1beta1
+kind: EnvironmentConfig
+metadata:
+  name: platform-development
+  labels:
+    platform.example.org/environment: development
+data:
+  replicas: 1
+  logLevel: debug
+  memoryLimit: 128Mi
