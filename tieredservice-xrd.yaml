@@ -1,0 +1,39 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: tieredservices.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: TieredService
+    plural: tieredservices
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              tier:
+                type: string
+                description: Service tier that selects the platform profile.
+                enum: ["economy", "standard", "critical"]
+                default: standard
+              image:
+                type: string
+                description: Container image to run.
+                default: nginx:1.27
+          status:
+            type: object
+            properties:
+              appliedProfile:
+                type: string
+                description: Name of the profile ConfigMap that was used.
+              profileVersion:
+                type: string
+                description: Version of the profile that was used.
