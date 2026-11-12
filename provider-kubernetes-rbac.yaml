@@ -1,20 +1,21 @@
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: provider-kubernetes-object-manager
 rules:
-apiGroups: [""]
-  resources: ["namespaces", "configmaps"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["namespaces", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: provider-kubernetes-object-manager
 subjects:
-kind: ServiceAccount
-  name: provider-kubernetes
-  namespace: crossplane-system
+  - kind: ServiceAccount
+    name: provider-kubernetes
+    namespace: crossplane-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
