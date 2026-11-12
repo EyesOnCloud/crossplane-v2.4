@@ -4,6 +4,6 @@ metadata:
   name: checkout-sessions
   namespace: checkout
 spec:
-  replicas: 2
+  replicas: 1
   writeConnectionSecretToRef:
     name: checkout-sessions-redis
