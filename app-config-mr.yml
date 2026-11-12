@@ -15,8 +15,8 @@ spec:
           app: payments
       data:
         APP_ENV: dev
-        LOG_LEVEL: debug
-        FEATURE_NEW_CHECKOUT: "true"
+        LOG_LEVEL: info
+        FEATURE_NEW_CHECKOUT: "false"
   providerConfigRef:
     kind: ClusterProviderConfig
     name: in-cluster
