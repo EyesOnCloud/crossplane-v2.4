@@ -1,0 +1,87 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: cache-service-redis
+spec:
+  compositeTypeRef:
+    apiVersion: cache.platform.example.com/v1alpha1
+    kind: CacheService
+  mode: Pipeline
+  pipeline:
+    - step: compose-redis
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: redis-deployment
+            base:
+              apiVersion: apps/v1
+              kind: Deployment
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: redis
+                        image: redis:7.4-alpine
+                        ports:
+                          - containerPort: 6379
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.selector.matchLabels.app
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.template.metadata.labels.app
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.replicas
+                toFieldPath: spec.replicas
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.availableReplicas
+                toFieldPath: status.availableReplicas
+            readinessChecks:
+              - type: MatchCondition
+                matchCondition:
+                  type: Available
+                  status: "True"
+          - name: redis-service
+            base:
+              apiVersion: v1
+              kind: Service
+              spec:
+                ports:
+                  - name: redis
+                    port: 6379
+                    targetPort: 6379
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.selector.app
+              - type: CombineToComposite
+                combine:
+                  variables:
+                    - fromFieldPath: metadata.name
+                    - fromFieldPath: metadata.namespace
+                  strategy: string
+                  string:
+                    fmt: "%s.%s.svc.cluster.local"
+                toFieldPath: status.endpoint
+              - type: ToCompositeFieldPath
+                fromFieldPath: spec.ports[0].port
+                toFieldPath: status.port
+            readinessChecks:
+              - type: None
+            connectionDetails:
+              - name: host
+                type: FromFieldPath
+                fromFieldPath: metadata.name
+              - name: port
+                type: FromFieldPath
+                fromFieldPath: spec.ports[0].port
