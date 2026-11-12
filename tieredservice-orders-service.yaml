@@ -1,0 +1,10 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TieredService
+metadata:
+  name: orders-service
+  namespace: app-services
+spec:
+  tier: standard
+  crossplane:
+    compositionRef:
+      name: tieredservice-pipeline
