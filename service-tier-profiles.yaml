@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-tier-economy
+  namespace: platform-config
+  labels:
+    platform.example.org/profile-type: service-tier
+    platform.example.org/tier: economy
+data:
+  profileVersion: "1"
+  replicas: "1"
+  cpuRequest: 50m
+  cpuLimit: 100m
+  memoryRequest: 64Mi
+  memoryLimit: 128Mi
+  logLevel: debug
+  disruptionBudget: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-tier-standard
+  namespace: platform-config
+  labels:
+    platform.example.org/profile-type: service-tier
+    platform.example.org/tier: standard
+data:
+  profileVersion: "1"
+  replicas: "2"
+  cpuRequest: 100m
+  cpuLimit: 250m
+  memoryRequest: 128Mi
+  memoryLimit: 256Mi
+  logLevel: info
+  disruptionBudget: "false"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-tier-critical
+  namespace: platform-config
+  labels:
+    platform.example.org/profile-type: service-tier
+    platform.example.org/tier: critical
+data:
+  profileVersion: "1"
+  replicas: "3"
+  cpuRequest: 250m
+  cpuLimit: 500m
+  memoryRequest: 256Mi
+  memoryLimit: 512Mi
+  logLevel: warn
+  disruptionBudget: "true"
