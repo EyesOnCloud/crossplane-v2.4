@@ -1,0 +1,9 @@
+apiVersion: cache.platform.example.com/v1alpha1
+kind: CacheService
+metadata:
+  name: checkout-sessions
+  namespace: checkout
+spec:
+  replicas: 2
+  writeConnectionSecretToRef:
+    name: checkout-sessions-redis
