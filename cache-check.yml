@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: checkout-cache-check
+  namespace: checkout
+spec:
+  restartPolicy: Never
+  containers:
+    - name: check
+      image: redis:7.4-alpine
+      envFrom:
+        - secretRef:
+            name: checkout-sessions-redis
+      command:
+        - sh
+        - -c
+        - 'echo "host=$host port=$port"; redis-cli -h "$host" -p "$port" ping'
