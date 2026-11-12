@@ -1,0 +1,11 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TieredService
+metadata:
+  name: ledger-service
+  namespace: app-services
+spec:
+  tier: critical
+  image: nginx:1.27-alpine
+  crossplane:
+    compositionRef:
+      name: tieredservice-pipeline
