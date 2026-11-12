@@ -1,0 +1,60 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: cacheservices.cache.platform.example.com
+spec:
+  scope: Namespaced
+  group: cache.platform.example.com
+  names:
+    kind: CacheService
+    plural: cacheservices
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      additionalPrinterColumns:
+        - name: ENDPOINT
+          type: string
+          jsonPath: .status.endpoint
+        - name: PORT
+          type: integer
+          jsonPath: .status.port
+        - name: AVAILABLE
+          type: integer
+          jsonPath: .status.availableReplicas
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - writeConnectionSecretToRef
+              properties:
+                replicas:
+                  type: integer
+                  description: Number of cache instances.
+                  minimum: 1
+                  maximum: 3
+                  default: 1
+                writeConnectionSecretToRef:
+                  type: object
+                  description: Secret that receives the connection details.
+                  required:
+                    - name
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the connection Secret in this namespace.
+            status:
+              type: object
+              properties:
+                endpoint:
+                  type: string
+                  description: Cluster DNS name of the cache.
+                port:
+                  type: integer
+                  description: Port the cache listens on.
+                availableReplicas:
+                  type: integer
+                  description: Number of cache instances ready to serve.
