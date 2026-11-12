@@ -1,0 +1,174 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: tieredservice-pipeline
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.org/v1alpha1
+    kind: TieredService
+  mode: Pipeline
+  pipeline:
+  - step: load-tier-profile
+    functionRef:
+      name: function-extra-resources
+    input:
+      apiVersion: extra-resources.fn.crossplane.io/v1beta1
+      kind: Input
+      spec:
+        extraResources:
+        - kind: ConfigMap
+          apiVersion: v1
+          into: tierProfile
+          type: Selector
+          namespace: platform-config
+          selector:
+            minMatch: 1
+            maxMatch: 1
+            matchLabels:
+            - key: platform.example.org/profile-type
+              type: Value
+              value: service-tier
+            - key: platform.example.org/tier
+              type: FromCompositeFieldPath
+              valueFromFieldPath: spec.tier
+  - step: derive-service-plan
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $xr := .observed.composite.resource }}
+          {{- $found := index .context "apiextensions.crossplane.io/extra-resources" }}
+          {{- $profile := index (index $found "tierProfile") 0 }}
+          {{- $d := $profile.data }}
+          ---
+          apiVersion: meta.gotemplating.fn.crossplane.io/v1alpha1
+          kind: Context
+          data:
+            "platform.example.org/service-plan":
+              tier: {{ $xr.spec.tier | quote }}
+              profileName: {{ $profile.metadata.name | quote }}
+              profileVersion: {{ $d.profileVersion | quote }}
+              replicas: {{ $d.replicas | int }}
+              cpuRequest: {{ $d.cpuRequest | quote }}
+              cpuLimit: {{ $d.cpuLimit | quote }}
+              memoryRequest: {{ $d.memoryRequest | quote }}
+              memoryLimit: {{ $d.memoryLimit | quote }}
+              logLevel: {{ $d.logLevel | quote }}
+              disruptionBudget: {{ eq $d.disruptionBudget "true" }}
+  - step: generate-resources
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $xr := .observed.composite.resource }}
+          {{- $name := $xr.metadata.name }}
+          {{- $plan := index .context "platform.example.org/service-plan" }}
+          ---
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: {{ $name }}-config
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: config
+              gotemplating.fn.crossplane.io/ready: "True"
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/tier: {{ $plan.tier }}
+          data:
+            SERVICE_TIER: {{ $plan.tier | quote }}
+            PROFILE_NAME: {{ $plan.profileName | quote }}
+            PROFILE_VERSION: {{ $plan.profileVersion | quote }}
+            LOG_LEVEL: {{ $plan.logLevel | quote }}
+            CONTEXT_KEYS: {{ keys .context | sortAlpha | join "," | quote }}
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: {{ $name }}-web
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: deployment
+              {{- if eq (.observed.resources.deployment | getResourceCondition "Available").Status "True" }}
+              gotemplating.fn.crossplane.io/ready: "True"
+              {{- end }}
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/tier: {{ $plan.tier }}
+          spec:
+            replicas: {{ $plan.replicas | int }}
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: {{ $name }}
+            template:
+              metadata:
+                labels:
+                  app.kubernetes.io/name: {{ $name }}
+                  platform.example.org/tier: {{ $plan.tier }}
+              spec:
+                containers:
+                - name: web
+                  image: {{ $xr.spec.image }}
+                  ports:
+                  - containerPort: 80
+                  envFrom:
+                  - configMapRef:
+                      name: {{ $name }}-config
+                  readinessProbe:
+                    httpGet:
+                      path: /
+                      port: 80
+                  resources:
+                    requests:
+                      cpu: {{ $plan.cpuRequest | quote }}
+                      memory: {{ $plan.memoryRequest | quote }}
+                    limits:
+                      cpu: {{ $plan.cpuLimit | quote }}
+                      memory: {{ $plan.memoryLimit | quote }}
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: {{ $name }}-web
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: service
+              gotemplating.fn.crossplane.io/ready: "True"
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/tier: {{ $plan.tier }}
+          spec:
+            selector:
+              app.kubernetes.io/name: {{ $name }}
+            ports:
+            - port: 80
+              targetPort: 80
+          {{- if $plan.disruptionBudget }}
+          ---
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+          metadata:
+            name: {{ $name }}-web
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: disruptionbudget
+              gotemplating.fn.crossplane.io/ready: "True"
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/tier: {{ $plan.tier }}
+          spec:
+            maxUnavailable: 1
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: {{ $name }}
+          {{- end }}
+          ---
+          apiVersion: platform.example.org/v1alpha1
+          kind: TieredService
+          status:
+            appliedProfile: {{ $plan.profileName | quote }}
+            profileVersion: {{ $plan.profileVersion | quote }}
