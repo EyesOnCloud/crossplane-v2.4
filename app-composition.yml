@@ -1,0 +1,70 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: applicationsuite-kcl
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.org/v1alpha1
+    kind: ApplicationSuite
+  mode: Pipeline
+  pipeline:
+  - step: generate-component-deployments
+    functionRef:
+      name: function-kcl
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      spec:
+        source: |
+          # Read the request and the resources that already exist
+          _oxr = option("params").oxr
+          _ocds = option("params").ocds or {}
+          _app = _oxr.spec.appName
+
+          # Helper 1: the company's standard labels
+          _labels = lambda app: str, component: str -> {str:str} {
+              {
+                  "app.kubernetes.io/part-of" = app
+                  "app.kubernetes.io/name" = component
+                  "app.kubernetes.io/managed-by" = "crossplane"
+              }
+          }
+
+          # Helper 2: is an existing Deployment fully available?
+          _ready = lambda observed: any, replicas: int -> str {
+              _available = observed?.Resource?.status?.availableReplicas
+              "True" if _available == replicas else "False"
+          }
+
+          # Loop: one Deployment per component in the list
+          _deployments = [{
+              apiVersion = "apps/v1"
+              kind = "Deployment"
+              metadata = {
+                  name = "${_app}-${c.name}"
+                  labels = _labels(_app, c.name)
+                  annotations = {
+                      "krm.kcl.dev/composition-resource-name" = "component-${c.name}"
+                      "krm.kcl.dev/ready" = _ready(_ocds["component-${c.name}"], c.replicas)
+                  }
+              }
+              spec = {
+                  replicas = c.replicas
+                  selector.matchLabels = _labels(_app, c.name)
+                  template = {
+                      metadata.labels = _labels(_app, c.name)
+                      spec.containers = [{
+                          name = c.name
+                          image = "nginx:1.28"
+                      }]
+                  }
+              }
+          } for c in _oxr.spec.components]
+
+          # Report the number of generated components on the XR
+          _dxr = {
+              **option("params").dxr
+              status.componentCount = len(_deployments)
+          }
+
+          items = _deployments + [_dxr]
