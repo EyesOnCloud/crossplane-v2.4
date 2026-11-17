@@ -1,0 +1,20 @@
+apiVersion: platform.example.org/v1alpha1
+kind: WebService
+metadata:
+  name: payments-api
+  namespace: webservices
+spec:
+  environment: prod
+  replicas: 2
+  features:
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 4
+    networkPolicy:
+      enabled: true
+      allowedNamespaces:
+      - shared-services
+  crossplane:
+    compositionRef:
+      name: webservice-dynamic
