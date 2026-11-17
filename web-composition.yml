@@ -1,0 +1,204 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: webservice-dynamic
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.org/v1alpha1
+    kind: WebService
+  mode: Pipeline
+  pipeline:
+  - step: render-webservice-resources
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $xr := .observed.composite.resource }}
+          {{- $name := $xr.metadata.name }}
+          {{- $ns := $xr.metadata.namespace }}
+          {{- $env := $xr.spec.environment }}
+          {{- $auto := $xr.spec.features.autoscaling }}
+          {{- $netpol := $xr.spec.features.networkPolicy }}
+          {{- $logLevel := "debug" }}
+          {{- if eq $env "staging" }}
+          {{- $logLevel = "info" }}
+          {{- end }}
+          {{- if eq $env "prod" }}
+          {{- $logLevel = "warn" }}
+          {{- end }}
+          {{- $features := list }}
+          {{- if $auto.enabled }}
+          {{- $features = append $features "autoscaling" }}
+          {{- end }}
+          {{- if $netpol.enabled }}
+          {{- $features = append $features "network-policy" }}
+          {{- end }}
+          {{- if eq $env "prod" }}
+          {{- $features = append $features "disruption-budget" }}
+          {{- end }}
+          {{- $featureList := "none" }}
+          {{- if $features }}
+          {{- $featureList = join "," $features }}
+          {{- end }}
+          ---
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: {{ $name }}-config
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: config
+              gotemplating.fn.crossplane.io/ready: "True"
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/environment: {{ $env }}
+          data:
+            APP_ENVIRONMENT: {{ $env | quote }}
+            LOG_LEVEL: {{ $logLevel | quote }}
+            ENABLED_FEATURES: {{ $featureList | quote }}
+          ---
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: {{ $name }}-web
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: deployment
+              {{- if eq (.observed.resources.deployment | getResourceCondition "Available").Status "True" }}
+              gotemplating.fn.crossplane.io/ready: "True"
+              {{- end }}
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/environment: {{ $env }}
+          spec:
+            {{- if not $auto.enabled }}
+            replicas: {{ $xr.spec.replicas | int }}
+            {{- end }}
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: {{ $name }}
+            template:
+              metadata:
+                labels:
+                  app.kubernetes.io/name: {{ $name }}
+                  platform.example.org/environment: {{ $env }}
+              spec:
+                containers:
+                - name: web
+                  image: {{ $xr.spec.image }}
+                  ports:
+                  - containerPort: 80
+                  envFrom:
+                  - configMapRef:
+                      name: {{ $name }}-config
+                  readinessProbe:
+                    httpGet:
+                      path: /
+                      port: 80
+                  resources:
+                    requests:
+                      cpu: 50m
+                      memory: 64Mi
+                    limits:
+                      cpu: 200m
+                      memory: 128Mi
+          ---
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: {{ $name }}-web
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: service
+              gotemplating.fn.crossplane.io/ready: "True"
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/environment: {{ $env }}
+          spec:
+            selector:
+              app.kubernetes.io/name: {{ $name }}
+            ports:
+            - port: 80
+              targetPort: 80
+          {{- if $auto.enabled }}
+          ---
+          apiVersion: autoscaling/v2
+          kind: HorizontalPodAutoscaler
+          metadata:
+            name: {{ $name }}-web
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: autoscaler
+              gotemplating.fn.crossplane.io/ready: "True"
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/environment: {{ $env }}
+          spec:
+            scaleTargetRef:
+              apiVersion: apps/v1
+              kind: Deployment
+              name: {{ $name }}-web
+            minReplicas: {{ $auto.minReplicas | int }}
+            maxReplicas: {{ $auto.maxReplicas | int }}
+            metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                target:
+                  type: Utilization
+                  averageUtilization: {{ $auto.cpuUtilization | int }}
+          {{- end }}
+          {{- if $netpol.enabled }}
+          ---
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: {{ $name }}-ingress
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: networkpolicy
+              gotemplating.fn.crossplane.io/ready: "True"
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/environment: {{ $env }}
+          spec:
+            podSelector:
+              matchLabels:
+                app.kubernetes.io/name: {{ $name }}
+            policyTypes:
+            - Ingress
+            ingress:
+            - from:
+              - podSelector: {}
+              {{- range $allowed := $netpol.allowedNamespaces }}
+              - namespaceSelector:
+                  matchLabels:
+                    kubernetes.io/metadata.name: {{ $allowed }}
+              {{- end }}
+              ports:
+              - port: 80
+                protocol: TCP
+          {{- end }}
+          {{- if eq $env "prod" }}
+          ---
+          apiVersion: policy/v1
+          kind: PodDisruptionBudget
+          metadata:
+            name: {{ $name }}-web
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: disruptionbudget
+              gotemplating.fn.crossplane.io/ready: "True"
+            labels:
+              app.kubernetes.io/name: {{ $name }}
+              platform.example.org/environment: {{ $env }}
+          spec:
+            maxUnavailable: 1
+            selector:
+              matchLabels:
+                app.kubernetes.io/name: {{ $name }}
+          {{- end }}
+          ---
+          apiVersion: platform.example.org/v1alpha1
+          kind: WebService
+          status:
+            serviceName: {{ $name }}-web
+            enabledFeatures: {{ $featureList | quote }}
