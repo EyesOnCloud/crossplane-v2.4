@@ -1,0 +1,8 @@
+apiVersion: platform.example.org/v1alpha1
+kind: ServiceConfig
+metadata:
+  name: ledger-api-config
+  namespace: payments-team
+spec:
+  appName: ledger-api
+  ownerTeam: finance-systems
