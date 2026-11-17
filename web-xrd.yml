@@ -1,0 +1,81 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: webservices.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: WebService
+    plural: webservices
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              environment:
+                type: string
+                description: Target environment of the service.
+                enum: ["dev", "staging", "prod"]
+              image:
+                type: string
+                description: Container image to run.
+                default: nginx:1.27
+              replicas:
+                type: integer
+                description: Number of pods when autoscaling is not used.
+                default: 1
+                minimum: 1
+                maximum: 10
+              features:
+                type: object
+                description: Optional features of the service.
+                default: {}
+                properties:
+                  autoscaling:
+                    type: object
+                    default: {}
+                    properties:
+                      enabled:
+                        type: boolean
+                        default: false
+                      minReplicas:
+                        type: integer
+                        default: 2
+                        minimum: 1
+                      maxReplicas:
+                        type: integer
+                        default: 5
+                        maximum: 20
+                      cpuUtilization:
+                        type: integer
+                        description: Target average CPU percentage.
+                        default: 70
+                        minimum: 10
+                        maximum: 100
+                  networkPolicy:
+                    type: object
+                    default: {}
+                    properties:
+                      enabled:
+                        type: boolean
+                        default: false
+                      allowedNamespaces:
+                        type: array
+                        description: Namespaces allowed to call this service.
+                        items:
+                          type: string
+            required: ["environment"]
+          status:
+            type: object
+            properties:
+              serviceName:
+                type: string
+              enabledFeatures:
+                type: string
