@@ -1,0 +1,38 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: serviceconfigs.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: ServiceConfig
+    plural: serviceconfigs
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              appName:
+                type: string
+                description: Name of the application.
+                maxLength: 40
+                pattern: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
+              ownerTeam:
+                type: string
+                description: Team that owns the application.
+            required:
+            - appName
+            - ownerTeam
+          status:
+            type: object
+            properties:
+              appliedSettingsVersion:
+                type: string
+                description: Version of the platform settings currently applied.
