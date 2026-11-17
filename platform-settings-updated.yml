@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-settings
+  namespace: platform-config
+data:
+  settingsVersion: "2026.12"
+  logLevel: warn
+  tracingEndpoint: http://tracing-collector.observability:4318
