@@ -1,0 +1,57 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: serviceconfig-with-platform-settings
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.org/v1alpha1
+    kind: ServiceConfig
+  mode: Pipeline
+  pipeline:
+  # Step 1: fetch the platform settings and store them in the context
+  - step: load-platform-settings
+    functionRef:
+      name: function-extra-resources
+    input:
+      apiVersion: extra-resources.fn.crossplane.io/v1beta1
+      kind: Input
+      spec:
+        extraResources:
+        - apiVersion: v1
+          kind: ConfigMap
+          type: Reference
+          ref:
+            name: platform-settings
+          namespace: platform-config
+          into: platformSettings
+  # Step 2: read the context and compose the runtime configuration
+  - step: compose-runtime-config
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.fn.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $xr := .observed.composite.resource }}
+          {{- $fetched := index .context "apiextensions.crossplane.io/extra-resources" }}
+          {{- $settings := (index $fetched.platformSettings 0).data }}
+          ---
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: {{ $xr.spec.appName }}-runtime-config
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: runtime-config
+              gotemplating.fn.crossplane.io/ready: "True"
+          data:
+            APP_NAME: {{ $xr.spec.appName | quote }}
+            OWNER_TEAM: {{ $xr.spec.ownerTeam | quote }}
+            LOG_LEVEL: {{ $settings.logLevel | quote }}
+            TRACING_ENDPOINT: {{ $settings.tracingEndpoint | quote }}
+          ---
+          apiVersion: platform.example.org/v1alpha1
+          kind: ServiceConfig
+          status:
+            appliedSettingsVersion: {{ $settings.settingsVersion | quote }}
