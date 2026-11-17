@@ -1,0 +1,11 @@
+apiVersion: platform.example.org/v1alpha1
+kind: WebService
+metadata:
+  name: catalog-api
+  namespace: webservices
+spec:
+  environment: dev
+  replicas: 1
+  crossplane:
+    compositionRef:
+      name: webservice-dynamic
