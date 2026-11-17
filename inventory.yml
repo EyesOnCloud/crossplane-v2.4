@@ -1,0 +1,13 @@
+apiVersion: platform.example.org/v1alpha1
+kind: ApplicationSuite
+metadata:
+  name: inventory-suite
+  namespace: inventory-system
+spec:
+  appName: inventory
+  components:
+  - name: web
+    replicas: 2
+  - name: api
+    replicas: 2
+  - name: worker
