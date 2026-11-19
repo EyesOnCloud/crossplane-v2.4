@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: denied-region-vpc
+  namespace: least-privilege-test
+spec:
+  forProvider:
+    region: us-west-2
+    cidrBlock: 10.31.0.0/16
+    tags:
+      Name: crossplane-role-denied-region-vpc
+      managed-by: crossplane
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: ec2-limited-role
