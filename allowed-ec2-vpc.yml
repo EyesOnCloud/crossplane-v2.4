@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: allowed-ec2-vpc
+  namespace: least-privilege-test
+spec:
+  forProvider:
+    region: us-east-1
+    cidrBlock: 10.30.0.0/16
+    tags:
+      Name: crossplane-role-allowed-vpc
+      managed-by: crossplane
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: ec2-limited-role
