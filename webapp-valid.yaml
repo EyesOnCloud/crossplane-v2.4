@@ -1,0 +1,9 @@
+apiVersion: platform.example.com/v1alpha1
+kind: WebApp
+metadata:
+  name: inventory
+  namespace: team-inventory
+spec:
+  appName: "  Inventory-API  "
+  environment: dev
+  replicas: 5
