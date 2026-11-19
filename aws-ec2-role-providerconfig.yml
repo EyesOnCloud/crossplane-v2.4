@@ -1,0 +1,13 @@
+apiVersion: aws.m.upbound.io/v1beta1
+kind: ClusterProviderConfig
+metadata:
+  name: ec2-limited-role
+spec:
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: aws-base-identity
+      key: creds
+  assumeRoleChain:
+  - roleARN: <your-role-arn>
