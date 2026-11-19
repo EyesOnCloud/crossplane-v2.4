@@ -1,0 +1,11 @@
+apiVersion: platform.example.com/v1alpha1
+kind: WebApp
+metadata:
+  name: catalog
+  namespace: team-catalog
+spec:
+  crossplane:
+    compositionRef:
+      name: webapp-rollout
+  image: nginx:1.27
+  replicas: 3
