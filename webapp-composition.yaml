@@ -1,0 +1,13 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: webapp-standard
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.com/v1alpha1
+    kind: WebApp
+  mode: Pipeline
+  pipeline:
+  - step: validate-and-normalize
+    functionRef:
+      name: function-app-guard
