@@ -1,0 +1,13 @@
+apiVersion: s3.aws.m.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  generateName: crossplane-denied-test-
+  namespace: least-privilege-test
+spec:
+  forProvider:
+    region: us-east-1
+    tags:
+      managed-by: crossplane
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: ec2-limited-role
