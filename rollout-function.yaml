@@ -1,0 +1,6 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: function-rollout-status
+spec:
+  package: docker.io/<your-docker-hub-username>/function-rollout-status:v0.1.0
