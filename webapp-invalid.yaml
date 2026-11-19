@@ -1,0 +1,9 @@
+apiVersion: platform.example.com/v1alpha1
+kind: WebApp
+metadata:
+  name: orders
+  namespace: team-orders
+spec:
+  appName: "Orders-Service"
+  environment: prod
+  replicas: 1
