@@ -1,0 +1,16 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Instance
+metadata:
+  name: connectivity-check
+  namespace: platform-sandbox
+spec:
+  forProvider:
+    region: us-east-1 #select your desired region
+    ami: <AMI_ID>
+    instanceType: t3.micro
+    tags:
+      Name: connectivity-check
+      owner: platform-team
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
