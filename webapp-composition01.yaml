@@ -1,0 +1,13 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: webapp-rollout
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.com/v1alpha1
+    kind: WebApp
+  mode: Pipeline
+  pipeline:
+  - step: compose-and-track-rollout
+    functionRef:
+      name: function-rollout-status
