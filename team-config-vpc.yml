@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: team-config-vpc
+  namespace: team-sandbox
+spec:
+  forProvider:
+    region: us-east-1   #Select Your Desired Region
+    cidrBlock: 10.41.0.0/16
+    tags:
+      Name: crossplane-team-config-vpc
+      managed-by: crossplane
+  providerConfigRef:
+    kind: ProviderConfig
+    name: team-sandbox-aws
