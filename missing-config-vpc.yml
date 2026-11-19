@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: missing-config-vpc
+  namespace: team-sandbox
+spec:
+  forProvider:
+    region: us-east-1
+    cidrBlock: 10.43.0.0/16
+    tags:
+      Name: crossplane-missing-config-vpc
+      managed-by: crossplane
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: production-aws
