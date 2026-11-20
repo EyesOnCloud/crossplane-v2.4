@@ -1,0 +1,10 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TeamNetwork
+metadata:
+  name: analytics-no-labels
+  namespace: analytics-dev
+spec:
+  networkName: analytics-dev-net
+  region: us-east-1
+  size: small
+  environment: development
