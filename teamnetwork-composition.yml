@@ -1,0 +1,53 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: teamnetwork-aws-vpc
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.org/v1alpha1
+    kind: TeamNetwork
+  mode: Pipeline
+  pipeline:
+  - step: compose-vpc
+    functionRef:
+      name: function-patch-and-transform
+    input:
+      apiVersion: pt.fn.crossplane.io/v1beta1
+      kind: Resources
+      resources:
+      - name: team-vpc
+        base:
+          apiVersion: ec2.aws.m.upbound.io/v1beta1
+          kind: VPC
+          spec:
+            forProvider:
+              region: us-east-1
+              enableDnsSupport: true
+              enableDnsHostnames: true
+              tags:
+                managed-by: crossplane
+        patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.size
+          toFieldPath: spec.forProvider.cidrBlock
+          transforms:
+          - type: map
+            map:
+              small: 10.70.0.0/24
+              medium: 10.70.0.0/20
+              large: 10.70.0.0/16
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.networkName
+          toFieldPath: spec.forProvider.tags.Name
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.environment
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.labels[owner]
+          toFieldPath: spec.forProvider.tags.owner
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.labels[cost-center]
+          toFieldPath: spec.forProvider.tags[cost-center]
