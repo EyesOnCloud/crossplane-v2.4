@@ -1,0 +1,13 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TeamNetwork
+metadata:
+  name: analytics-dev-network
+  namespace: analytics-dev
+  labels:
+    owner: analytics-team
+    cost-center: cc-4021
+spec:
+  networkName: analytics-dev-net
+  region: us-east-1
+  size: small
+  environment: development
