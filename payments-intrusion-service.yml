@@ -1,0 +1,7 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TeamService
+metadata:
+  name: payments-intrusion-service
+  namespace: search-team
+spec:
+  replicas: 1
