@@ -1,0 +1,13 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TeamNetwork
+metadata:
+  name: analytics-bad-cost-center
+  namespace: analytics-dev
+  labels:
+    owner: analytics-team
+    cost-center: finance
+spec:
+  networkName: analytics-dev-net
+  region: us-east-1
+  size: small
+  environment: development
