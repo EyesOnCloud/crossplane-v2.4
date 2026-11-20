@@ -1,0 +1,53 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: teamnetworks.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: TeamNetwork
+    plural: teamnetworks
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              networkName:
+                type: string
+                description: Format <team>-<dev|prod>-net, for example analytics-dev-net.
+                pattern: '^[a-z][a-z0-9]{1,15}-(dev|prod)-net$'
+              region:
+                type: string
+                description: Approved AWS region.
+                enum:
+                - us-east-1
+                - us-west-2
+              size:
+                type: string
+                description: small = /24, medium = /20, large = /16 (production only).
+                enum:
+                - small
+                - medium
+                - large
+              environment:
+                type: string
+                enum:
+                - development
+                - production
+            required:
+            - networkName
+            - region
+            - size
+            - environment
+            x-kubernetes-validations:
+            - rule: "self.environment == 'production' ? self.networkName.endsWith('-prod-net') : self.networkName.endsWith('-dev-net')"
+              message: "networkName must end with -prod-net for production and -dev-net for development."
+            - rule: "self.size != 'large' || self.environment == 'production'"
+              message: "size large is allowed only for production networks."
