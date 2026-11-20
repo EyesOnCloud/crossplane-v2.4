@@ -1,0 +1,31 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroup
+metadata:
+  name: qa-workload
+  namespace: qa-sandbox
+spec:
+  forProvider:
+    region: us-east-1
+    name: qa-workload
+    description: QA test workload - internal HTTPS only
+    vpcIdRef:
+      name: qa-sandbox-vpc
+    tags:
+      Name: qa-workload
+      owner: qa-team
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroupIngressRule
+metadata:
+  name: qa-workload-internal-https
+  namespace: qa-sandbox
+spec:
+  forProvider:
+    region: us-east-1
+    securityGroupIdRef:
+      name: qa-workload
+    description: HTTPS from inside the sandbox VPC only
+    ipProtocol: tcp
+    fromPort: 443
+    toPort: 443
+    cidrIpv4: 10.80.0.0/16
