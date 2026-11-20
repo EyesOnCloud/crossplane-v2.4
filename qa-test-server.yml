@@ -1,0 +1,25 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Instance
+metadata:
+  name: qa-test-server
+  namespace: qa-sandbox
+spec:
+  forProvider:
+    region: us-east-1
+    ami: <AMI_ID>
+    instanceType: t3.micro
+    subnetIdRef:
+      name: qa-sandbox-subnet
+    vpcSecurityGroupIdRefs:
+      - name: qa-workload
+    rootBlockDevice:
+      volumeSize: 8
+      volumeType: gp3
+      encrypted: true
+      deleteOnTermination: true
+    metadataOptions:
+      httpTokens: required
+    tags:
+      Name: qa-test-server
+      owner: qa-team
+      purpose: disposable-test
