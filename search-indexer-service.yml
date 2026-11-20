@@ -1,0 +1,7 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TeamService
+metadata:
+  name: indexer-service
+  namespace: search-team
+spec:
+  replicas: 2
