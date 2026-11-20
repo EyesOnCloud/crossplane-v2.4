@@ -1,0 +1,13 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TeamNetwork
+metadata:
+  name: analytics-prod-network
+  namespace: analytics-prod
+  labels:
+    owner: analytics-team
+    cost-center: cc-4021
+spec:
+  networkName: analytics-prod-net
+  region: us-east-1
+  size: large
+  environment: production
