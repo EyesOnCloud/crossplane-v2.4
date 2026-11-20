@@ -1,0 +1,31 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: qa-sandbox-vpc
+  namespace: qa-sandbox
+spec:
+  forProvider:
+    region: us-east-1
+    cidrBlock: 10.80.0.0/16
+    enableDnsSupport: true
+    enableDnsHostnames: true
+    tags:
+      Name: qa-sandbox-vpc
+      owner: qa-team
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: qa-sandbox-subnet
+  namespace: qa-sandbox
+spec:
+  forProvider:
+    region: us-east-1
+    availabilityZone: us-east-1a
+    cidrBlock: 10.80.1.0/24
+    mapPublicIpOnLaunch: false
+    vpcIdRef:
+      name: qa-sandbox-vpc
+    tags:
+      Name: qa-sandbox-subnet
+      owner: qa-team
