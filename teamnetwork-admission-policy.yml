@@ -1,0 +1,33 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: teamnetwork-governance
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:
+      - platform.example.org
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - teamnetworks
+  validations:
+  - expression: "has(object.metadata.labels) && 'owner' in object.metadata.labels"
+    message: "TeamNetwork must have an owner label."
+  - expression: "has(object.metadata.labels) && 'cost-center' in object.metadata.labels && object.metadata.labels['cost-center'].matches('^cc-[0-9]{4}$')"
+    message: "TeamNetwork must have a cost-center label in the format cc-NNNN, for example cc-4021."
+  - expression: "object.spec.environment != 'production' || (has(namespaceObject.metadata.labels) && 'platform.example.org/tier' in namespaceObject.metadata.labels && namespaceObject.metadata.labels['platform.example.org/tier'] == 'production')"
+    message: "Production TeamNetworks are allowed only in namespaces labelled platform.example.org/tier=production."
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: teamnetwork-governance-binding
+spec:
+  policyName: teamnetwork-governance
+  validationActions:
+  - Deny
