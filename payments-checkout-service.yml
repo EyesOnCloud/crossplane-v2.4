@@ -1,0 +1,7 @@
+apiVersion: platform.example.org/v1alpha1
+kind: TeamService
+metadata:
+  name: checkout-service
+  namespace: payments-team
+spec:
+  replicas: 2
