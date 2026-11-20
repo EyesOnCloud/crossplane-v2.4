@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: oversized-batch-job
+  namespace: payments-team
+spec:
+  containers:
+  - name: batch
+    image: nginx:1.28
+    resources:
+      requests:
+        cpu: 500m
+        memory: 256Mi
+      limits:
+        cpu: "1"
+        memory: 256Mi
