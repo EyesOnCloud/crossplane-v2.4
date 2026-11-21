@@ -22,7 +22,7 @@ spec:
           kind: VPC
           spec:
             forProvider:
-              region: us-east-1
+              region: $region
               cidrBlock: 10.60.0.0/16
               enableDnsSupport: true
               enableDnsHostnames: true
@@ -46,8 +46,8 @@ spec:
           kind: Subnet
           spec:
             forProvider:
-              region: us-east-1
-              availabilityZone: us-east-1a
+              region: $region
+              availabilityZone: $az_a
               cidrBlock: 10.60.1.0/24
               vpcIdSelector:
                 matchControllerRef: true
@@ -72,7 +72,7 @@ spec:
           kind: SecurityGroup
           spec:
             forProvider:
-              region: us-east-1
+              region: $region
               description: No inbound access. Managed by the compute platform.
               vpcIdSelector:
                 matchControllerRef: true
@@ -105,7 +105,7 @@ spec:
           kind: Instance
           spec:
             forProvider:
-              region: us-east-1
+              region: $region
               subnetIdSelector:
                 matchControllerRef: true
               vpcSecurityGroupIdSelector:
@@ -133,8 +133,8 @@ spec:
           transforms:
           - type: map
             map:
-              amazon-linux-2023: <amazon-linux-2023-ami-id>
-              ubuntu-24-04: <ubuntu-24-04-ami-id>
+              amazon-linux-2023: $AMI_ID
+              ubuntu-24-04: $UBUNTU_ID
         - type: FromCompositeFieldPath
           fromFieldPath: spec.environment
           toFieldPath: spec.forProvider.monitoring
