@@ -10,6 +10,6 @@ spec:
       name: inventory-api
     description: Support team access to the inventory API
     ipProtocol: tcp
-    fromPort: 9090
-    toPort: 9090
+    fromPort: 8080
+    toPort: 8080
     cidrIpv4: <YOUR_PUBLIC_IP>/32
