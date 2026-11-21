@@ -1,0 +1,17 @@
+apiVersion: s3.aws.m.upbound.io/v1beta1
+kind: BucketPublicAccessBlock
+metadata:
+  name: app-documents-public-access-block
+  namespace: app-storage
+spec:
+  forProvider:
+    region: us-east-1
+    bucketRef:
+      name: app-documents-<unique-suffix>
+    blockPublicAcls: true
+    ignorePublicAcls: true
+    blockPublicPolicy: true
+    restrictPublicBuckets: true
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
