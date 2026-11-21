@@ -1,0 +1,39 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTable
+metadata:
+  name: orders-private-route-table
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    vpcIdRef:
+      name: orders-vpc
+    tags:
+      Name: orders-private-route-table
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Route
+metadata:
+  name: orders-private-nat-route
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    destinationCidrBlock: 0.0.0.0/0
+    routeTableIdRef:
+      name: orders-private-route-table
+    natGatewayIdRef:
+      name: orders-nat-gateway
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTableAssociation
+metadata:
+  name: orders-private-association
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    subnetIdRef:
+      name: orders-private-subnet
+    routeTableIdRef:
+      name: orders-private-route-table
