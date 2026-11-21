@@ -1,0 +1,12 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: EIP
+metadata:
+  name: orders-nat-eip
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    domain: vpc
+    tags:
+      Name: orders-nat-eip
+      purpose: nat-gateway
