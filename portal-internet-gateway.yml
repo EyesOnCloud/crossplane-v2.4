@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: InternetGateway
+metadata:
+  name: portal-internet-gateway
+  namespace: portal-network
+spec:
+  forProvider:
+    region: us-east-1
+    vpcIdRef:
+      name: portal-vpc
+    tags:
+      Name: portal-internet-gateway
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
