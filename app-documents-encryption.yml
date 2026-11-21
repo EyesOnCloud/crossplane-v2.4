@@ -1,0 +1,16 @@
+apiVersion: s3.aws.m.upbound.io/v1beta1
+kind: BucketServerSideEncryptionConfiguration
+metadata:
+  name: app-documents-encryption
+  namespace: app-storage
+spec:
+  forProvider:
+    region: us-east-1
+    bucketRef:
+      name: app-documents-<unique-suffix>
+    rule:
+      - applyServerSideEncryptionByDefault:
+          sseAlgorithm: AES256
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
