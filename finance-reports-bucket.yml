@@ -1,0 +1,14 @@
+apiVersion: s3.aws.m.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  name: finance-reports
+  namespace: finance-storage
+  annotations:
+    crossplane.io/external-name: finance-reports-<unique-suffix>
+spec:
+  managementPolicies: ["Observe"]
+  forProvider:
+    region: us-east-1 #Select your Desired Region
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
