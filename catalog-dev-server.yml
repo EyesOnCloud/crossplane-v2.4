@@ -1,0 +1,7 @@
+apiVersion: platform.example.org/v1alpha1
+kind: AppServer
+metadata:
+  name: catalog-dev-server
+  namespace: catalog-team
+spec:
+  environment: development
