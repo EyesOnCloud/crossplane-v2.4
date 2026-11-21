@@ -1,0 +1,19 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Instance
+metadata:
+  name: orders-egress-test
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    ami: <AMI_ID>
+    instanceType: t3.micro
+    subnetIdRef:
+      name: orders-private-subnet
+    userData: |
+      #!/bin/bash
+      sleep 30
+      IP=$(curl -s --max-time 20 https://checkip.amazonaws.com)
+      echo "EGRESS-CHECK public-ip=${IP:-FAILED}" > /dev/console
+    tags:
+      Name: orders-egress-test
