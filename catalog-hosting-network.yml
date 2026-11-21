@@ -1,0 +1,83 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: catalog-hosting-vpc
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: $region
+    cidrBlock: 10.90.0.0/16
+    enableDnsSupport: true
+    enableDnsHostnames: true
+    tags:
+      Name: catalog-hosting-vpc
+      owner: catalog-team
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: InternetGateway
+metadata:
+  name: catalog-hosting-igw
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: $region
+    vpcIdRef:
+      name: catalog-hosting-vpc
+    tags:
+      Name: catalog-hosting-igw
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: catalog-hosting-public-subnet
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: $region
+    availabilityZone: $az_a
+    cidrBlock: 10.90.1.0/24
+    mapPublicIpOnLaunch: true
+    vpcIdRef:
+      name: catalog-hosting-vpc
+    tags:
+      Name: catalog-hosting-public-subnet
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTable
+metadata:
+  name: catalog-hosting-public-rt
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: $region
+    vpcIdRef:
+      name: catalog-hosting-vpc
+    tags:
+      Name: catalog-hosting-public-rt
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Route
+metadata:
+  name: catalog-hosting-internet-route
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: $region
+    destinationCidrBlock: 0.0.0.0/0
+    routeTableIdRef:
+      name: catalog-hosting-public-rt
+    gatewayIdRef:
+      name: catalog-hosting-igw
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTableAssociation
+metadata:
+  name: catalog-hosting-public-association
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: $region
+    subnetIdRef:
+      name: catalog-hosting-public-subnet
+    routeTableIdRef:
+      name: catalog-hosting-public-rt
