@@ -1,0 +1,16 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Route
+metadata:
+  name: portal-internet-route
+  namespace: portal-network
+spec:
+  forProvider:
+    region: us-east-1
+    destinationCidrBlock: 0.0.0.0/0
+    routeTableIdRef:
+      name: portal-public-route-table
+    gatewayIdRef:
+      name: portal-internet-gateway
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
