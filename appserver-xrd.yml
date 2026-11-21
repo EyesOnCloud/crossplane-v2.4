@@ -1,0 +1,55 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: appservers.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: AppServer
+    plural: appservers
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              size:
+                type: string
+                description: Server size. small = 2 vCPU / 1 GiB, medium = 2 vCPU / 2 GiB.
+                enum:
+                - small
+                - medium
+                default: small
+              image:
+                type: string
+                description: Operating system from the approved image catalog.
+                enum:
+                - amazon-linux-2023
+                - ubuntu-24-04
+                default: amazon-linux-2023
+              environment:
+                type: string
+                description: Target environment. Production enables detailed monitoring.
+                enum:
+                - development
+                - production
+                x-kubernetes-validations:
+                - rule: self == oldSelf
+                  message: environment cannot be changed after creation.
+            required:
+            - environment
+          status:
+            type: object
+            properties:
+              instanceId:
+                type: string
+                description: AWS ID of the created instance.
+              privateIp:
+                type: string
+                description: Private IP address of the instance.
