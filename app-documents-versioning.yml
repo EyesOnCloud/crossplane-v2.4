@@ -1,0 +1,15 @@
+apiVersion: s3.aws.m.upbound.io/v1beta1
+kind: BucketVersioning
+metadata:
+  name: app-documents-versioning
+  namespace: app-storage
+spec:
+  forProvider:
+    region: us-east-1
+    bucketRef:
+      name: app-documents-<unique-suffix>
+    versioningConfiguration:
+      status: Enabled
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
