@@ -1,0 +1,19 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: app-network
+  namespace: web-network
+  labels:
+    network: web-app
+spec:
+  forProvider:
+    region: us-east-1
+    cidrBlock: 10.20.0.0/16
+    enableDnsSupport: true
+    enableDnsHostnames: true
+    tags:
+      Name: app-network
+      owner: platform-team
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
