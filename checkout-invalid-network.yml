@@ -1,0 +1,10 @@
+apiVersion: platform.example.org/v1alpha1
+kind: AppNetwork
+metadata:
+  name: checkout-test
+  namespace: checkout-team
+spec:
+  environment: test
+  vpcCidr: 10.70.0.0
+  publicSubnetCidr: 10.70.1.0/24
+  privateSubnetCidr: 10.70.2.0/24
