@@ -1,0 +1,125 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: appenvironment-aws-network
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.org/v1alpha1
+    kind: AppEnvironment
+  mode: Pipeline
+  pipeline:
+  - step: load-environment-profile
+    functionRef:
+      name: function-environment-configs
+    input:
+      apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+      kind: Input
+      spec:
+        environmentConfigs:
+        - type: Selector
+          selector:
+            mode: Single
+            matchLabels:
+            - type: FromCompositeFieldPath
+              key: platform.example.org/profile
+              valueFromFieldPath: spec.environment
+  - step: compose-network
+    functionRef:
+      name: function-patch-and-transform
+    input:
+      apiVersion: pt.fn.crossplane.io/v1beta1
+      kind: Resources
+      resources:
+      - name: vpc
+        base:
+          apiVersion: ec2.aws.m.upbound.io/v1beta1
+          kind: VPC
+          spec:
+            forProvider:
+              region: $region
+              enableDnsSupport: true
+              enableDnsHostnames: true
+              tags:
+                managedBy: crossplane
+                release: v1
+        patches:
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: region
+          toFieldPath: spec.forProvider.region
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: vpcCidr
+          toFieldPath: spec.forProvider.cidrBlock
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: costCenter
+          toFieldPath: spec.forProvider.tags.costCenter
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: criticality
+          toFieldPath: spec.forProvider.tags.criticality
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: backupPolicy
+          toFieldPath: spec.forProvider.tags.backupPolicy
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: dataRetentionDays
+          toFieldPath: spec.forProvider.tags.retentionDays
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.forProvider.tags.application
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.environment
+        - type: CombineFromComposite
+          combine:
+            variables:
+            - fromFieldPath: spec.appName
+            - fromFieldPath: spec.environment
+            strategy: string
+            string:
+              fmt: "%s-%s-vpc"
+          toFieldPath: spec.forProvider.tags.Name
+        - type: ToCompositeFieldPath
+          fromFieldPath: status.atProvider.id
+          toFieldPath: status.vpcId
+        - type: ToCompositeFieldPath
+          fromFieldPath: spec.forProvider.region
+          toFieldPath: status.region
+      - name: subnet
+        base:
+          apiVersion: ec2.aws.m.upbound.io/v1beta1
+          kind: Subnet
+          spec:
+            forProvider:
+              region: $region
+              mapPublicIpOnLaunch: false
+              vpcIdSelector:
+                matchControllerRef: true
+              tags:
+                managedBy: crossplane
+                release: v1
+        patches:
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: region
+          toFieldPath: spec.forProvider.region
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: availabilityZone
+          toFieldPath: spec.forProvider.availabilityZone
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: subnetCidr
+          toFieldPath: spec.forProvider.cidrBlock
+        - type: FromEnvironmentFieldPath
+          fromFieldPath: costCenter
+          toFieldPath: spec.forProvider.tags.costCenter
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.appName
+          toFieldPath: spec.forProvider.tags.application
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.environment
+          toFieldPath: spec.forProvider.tags.environment
+        - type: CombineFromComposite
+          combine:
+            variables:
+            - fromFieldPath: spec.appName
+            - fromFieldPath: spec.environment
+            strategy: string
+            string:
+              fmt: "%s-%s-subnet"
+          toFieldPath: spec.forProvider.tags.Name
