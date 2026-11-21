@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroup
+metadata:
+  name: inventory-api
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    name: inventory-api
+    description: Inventory API - restricted inbound and outbound access
+    vpcIdRef:
+      name: inventory-vpc
+    tags:
+      Name: inventory-api
+      owner: inventory-team
