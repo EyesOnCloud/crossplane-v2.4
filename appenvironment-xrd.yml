@@ -1,0 +1,51 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: appenvironments.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: AppEnvironment
+    plural: appenvironments
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    additionalPrinterColumns:
+    - name: Environment
+      type: string
+      jsonPath: .spec.environment
+    - name: Region
+      type: string
+      jsonPath: .status.region
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              appName:
+                type: string
+                description: Application name, 2 to 16 lowercase letters or digits.
+                pattern: '^[a-z][a-z0-9]{1,15}$'
+              environment:
+                type: string
+                description: Environment profile to apply.
+                enum:
+                - development
+                - production
+                x-kubernetes-validations:
+                - rule: "self == oldSelf"
+                  message: "environment cannot be changed after creation. Create a new request instead."
+            required:
+            - appName
+            - environment
+          status:
+            type: object
+            properties:
+              region:
+                type: string
+              vpcId:
+                type: string
