@@ -1,0 +1,9 @@
+apiVersion: platform.example.org/v1alpha1
+kind: AppServer
+metadata:
+  name: catalog-oversized-server
+  namespace: catalog-team
+spec:
+  size: xlarge
+  image: windows-2022
+  environment: production
