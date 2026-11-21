@@ -1,0 +1,30 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Instance
+metadata:
+  name: inventory-api-test
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    ami: <AMI_ID>
+    instanceType: t3.micro
+    subnetIdRef:
+      name: inventory-public-subnet
+    vpcSecurityGroupIdRefs:
+      - name: inventory-api
+    userData: |
+      #!/bin/bash
+      mkdir -p /srv/web
+      echo "inventory api test page" > /srv/web/index.html
+      systemd-run --unit=web-8080 \
+        python3 -m http.server 8080 --directory /srv/web
+      systemd-run --unit=web-9090 \
+        python3 -m http.server 9090 --directory /srv/web
+      sleep 30
+      if curl -s --max-time 10 https://checkip.amazonaws.com >/dev/null
+      then R1=ALLOWED; else R1=BLOCKED; fi
+      if curl -s --max-time 10 http://checkip.amazonaws.com >/dev/null
+      then R2=ALLOWED; else R2=BLOCKED; fi
+      echo "EGRESS-CHECK https-443=$R1 http-80=$R2" > /dev/console
+    tags:
+      Name: inventory-api-test
