@@ -1,0 +1,47 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroup
+metadata:
+  name: catalog-web
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: us-east-1
+    name: catalog-web
+    description: Catalog web page - review team HTTP only
+    vpcIdRef:
+      name: catalog-hosting-vpc
+    tags:
+      Name: catalog-web
+      owner: catalog-team
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroupIngressRule
+metadata:
+  name: catalog-web-http-from-reviewers
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: us-east-1
+    securityGroupIdRef:
+      name: catalog-web
+    description: HTTP from the approved review network
+    ipProtocol: tcp
+    fromPort: 80
+    toPort: 80
+    cidrIpv4: <YOUR_PUBLIC_IP>/32
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroupEgressRule
+metadata:
+  name: catalog-web-https-out
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: us-east-1
+    securityGroupIdRef:
+      name: catalog-web
+    description: HTTPS for package downloads
+    ipProtocol: tcp
+    fromPort: 443
+    toPort: 443
+    cidrIpv4: 0.0.0.0/0
