@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTable
+metadata:
+  name: portal-public-route-table
+  namespace: portal-network
+spec:
+  forProvider:
+    region: us-east-1
+    vpcIdRef:
+      name: portal-vpc
+    tags:
+      Name: portal-public-route-table
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
