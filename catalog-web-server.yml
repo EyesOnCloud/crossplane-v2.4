@@ -1,0 +1,38 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Instance
+metadata:
+  name: catalog-web-server
+  namespace: catalog-hosting
+spec:
+  forProvider:
+    region: us-east-1
+    ami: <AMI_ID>
+    instanceType: t3.micro
+    subnetIdRef:
+      name: catalog-hosting-public-subnet
+    vpcSecurityGroupIdRefs:
+      - name: catalog-web
+    rootBlockDevice:
+      volumeSize: 8
+      volumeType: gp3
+      encrypted: true
+      deleteOnTermination: true
+    metadataOptions:
+      httpTokens: required
+    userData: |
+      #!/bin/bash
+      set -e
+      dnf install -y nginx
+      cat > /usr/share/nginx/html/index.html <<'EOF'
+      <html><body>
+      <h1>Product Catalog - Review Environment</h1>
+      <p>Hosted on AWS, provisioned by Crossplane.</p>
+      </body></html>
+      EOF
+      echo "OK" > /usr/share/nginx/html/health.txt
+      systemctl enable --now nginx
+      echo "APP-BOOTSTRAP: nginx installed and started" > /dev/console
+    tags:
+      Name: catalog-web-server
+      owner: catalog-team
+      app: product-catalog
