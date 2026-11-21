@@ -1,0 +1,9 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: function-app-guard
+  annotations:
+    render.crossplane.io/runtime: Development
+spec:
+  # Ignored by the Development runtime. Any value works here.
+  package: xpkg.crossplane.io/platform-team/function-app-guard:v0.1.0
