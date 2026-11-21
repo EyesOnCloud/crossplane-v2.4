@@ -1,0 +1,15 @@
+apiVersion: apiextensions.crossplane.io/v1beta1
+kind: EnvironmentConfig
+metadata:
+  name: aws-env-production
+  labels:
+    platform.example.org/profile: production
+data:
+  region: us-east-1
+  availabilityZone: us-east-1a
+  vpcCidr: 10.20.0.0/16
+  subnetCidr: 10.20.1.0/24
+  costCenter: cc-2001
+  criticality: high
+  backupPolicy: daily
+  dataRetentionDays: "365"
