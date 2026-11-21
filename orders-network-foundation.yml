@@ -1,0 +1,97 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: orders-vpc
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    cidrBlock: 10.40.0.0/16
+    enableDnsSupport: true
+    enableDnsHostnames: true
+    tags:
+      Name: orders-vpc
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: InternetGateway
+metadata:
+  name: orders-internet-gateway
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    vpcIdRef:
+      name: orders-vpc
+    tags:
+      Name: orders-internet-gateway
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: orders-public-subnet
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    availabilityZone: us-east-1a
+    cidrBlock: 10.40.1.0/24
+    vpcIdRef:
+      name: orders-vpc
+    tags:
+      Name: orders-public-subnet
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: orders-private-subnet
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    availabilityZone: us-east-1a
+    cidrBlock: 10.40.2.0/24
+    mapPublicIpOnLaunch: false
+    vpcIdRef:
+      name: orders-vpc
+    tags:
+      Name: orders-private-subnet
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTable
+metadata:
+  name: orders-public-route-table
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    vpcIdRef:
+      name: orders-vpc
+    tags:
+      Name: orders-public-route-table
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Route
+metadata:
+  name: orders-public-internet-route
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    destinationCidrBlock: 0.0.0.0/0
+    routeTableIdRef:
+      name: orders-public-route-table
+    gatewayIdRef:
+      name: orders-internet-gateway
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTableAssociation
+metadata:
+  name: orders-public-association
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    subnetIdRef:
+      name: orders-public-subnet
+    routeTableIdRef:
+      name: orders-public-route-table
