@@ -1,0 +1,82 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: inventory-vpc
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    cidrBlock: 10.50.0.0/16
+    enableDnsSupport: true
+    enableDnsHostnames: true
+    tags:
+      Name: inventory-vpc
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: InternetGateway
+metadata:
+  name: inventory-internet-gateway
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    vpcIdRef:
+      name: inventory-vpc
+    tags:
+      Name: inventory-internet-gateway
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: inventory-public-subnet
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    availabilityZone: us-east-1a
+    cidrBlock: 10.50.1.0/24
+    mapPublicIpOnLaunch: true
+    vpcIdRef:
+      name: inventory-vpc
+    tags:
+      Name: inventory-public-subnet
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTable
+metadata:
+  name: inventory-public-route-table
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    vpcIdRef:
+      name: inventory-vpc
+    tags:
+      Name: inventory-public-route-table
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Route
+metadata:
+  name: inventory-internet-route
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    destinationCidrBlock: 0.0.0.0/0
+    routeTableIdRef:
+      name: inventory-public-route-table
+    gatewayIdRef:
+      name: inventory-internet-gateway
+---
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTableAssociation
+metadata:
+  name: inventory-public-association
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    subnetIdRef:
+      name: inventory-public-subnet
+    routeTableIdRef:
+      name: inventory-public-route-table
