@@ -1,0 +1,17 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: VPC
+metadata:
+  name: portal-vpc
+  namespace: portal-network
+spec:
+  forProvider:
+    region: us-east-1  # Select your desired region
+    cidrBlock: 10.30.0.0/16
+    enableDnsSupport: true
+    enableDnsHostnames: true
+    tags:
+      Name: portal-vpc
+      owner: platform-team
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
