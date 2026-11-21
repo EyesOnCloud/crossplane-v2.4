@@ -1,0 +1,19 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroup
+metadata:
+  name: db-tier
+  namespace: web-network
+spec:
+  forProvider:
+    region: us-east-1
+    name: db-tier
+    description: Security group for the database tier
+    vpcIdSelector:
+      matchLabels:
+        network: web-app
+    tags:
+      Name: db-tier
+      owner: platform-team
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
