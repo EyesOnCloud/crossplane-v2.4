@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroupIngressRule
+metadata:
+  name: inventory-api-inbound
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    securityGroupIdRef:
+      name: inventory-api
+    description: Support team access to the inventory API
+    ipProtocol: tcp
+    fromPort: 9090
+    toPort: 9090
+    cidrIpv4: <YOUR_PUBLIC_IP>/32
