@@ -1,0 +1,9 @@
+apiVersion: platform.example.org/v1alpha1
+kind: AppServer
+metadata:
+  name: catalog-prod-server
+  namespace: catalog-team
+spec:
+  size: medium
+  image: ubuntu-24-04
+  environment: production
