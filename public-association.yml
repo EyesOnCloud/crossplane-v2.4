@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: RouteTableAssociation
+metadata:
+  name: portal-public-association
+  namespace: portal-network
+spec:
+  forProvider:
+    region: us-east-1
+    subnetIdRef:
+      name: portal-public-subnet
+    routeTableIdRef:
+      name: portal-public-route-table
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
