@@ -1,0 +1,19 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: Subnet
+metadata:
+  name: portal-private-subnet
+  namespace: portal-network
+spec:
+  forProvider:
+    region: us-east-1
+    availabilityZone: us-east-1b
+    cidrBlock: 10.30.2.0/24
+    mapPublicIpOnLaunch: false
+    vpcIdRef:
+      name: portal-vpc
+    tags:
+      Name: portal-private-subnet
+      tier: private
+  providerConfigRef:
+    kind: ClusterProviderConfig
+    name: default
