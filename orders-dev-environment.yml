@@ -1,0 +1,8 @@
+apiVersion: platform.example.org/v1alpha1
+kind: AppEnvironment
+metadata:
+  name: orders-dev
+  namespace: orders-dev
+spec:
+  appName: orders
+  environment: development
