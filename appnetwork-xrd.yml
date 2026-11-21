@@ -1,0 +1,54 @@
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: appnetworks.platform.example.org
+spec:
+  scope: Namespaced
+  group: platform.example.org
+  names:
+    kind: AppNetwork
+    plural: appnetworks
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              environment:
+                description: Environment this network serves.
+                type: string
+                enum: ["dev", "staging", "prod"]
+              vpcCidr:
+                description: Address range of the whole VPC.
+                type: string
+                pattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$'
+              publicSubnetCidr:
+                description: Address range of the public subnet.
+                type: string
+                pattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$'
+              privateSubnetCidr:
+                description: Address range of the private subnet.
+                type: string
+                pattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}/[0-9]{1,2}$'
+            required:
+            - environment
+            - vpcCidr
+            - publicSubnetCidr
+            - privateSubnetCidr
+          status:
+            type: object
+            properties:
+              vpcId:
+                description: ID of the created VPC.
+                type: string
+              publicSubnetId:
+                description: ID of the public subnet.
+                type: string
+              privateSubnetId:
+                description: ID of the private subnet.
+                type: string
