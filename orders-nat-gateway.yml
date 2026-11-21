@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: NATGateway
+metadata:
+  name: orders-nat-gateway
+  namespace: orders-network
+spec:
+  forProvider:
+    region: us-east-1
+    connectivityType: public
+    allocationIdRef:
+      name: orders-nat-eip
+    subnetIdRef:
+      name: orders-public-subnet
+    tags:
+      Name: orders-nat-gateway
