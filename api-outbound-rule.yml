@@ -1,0 +1,15 @@
+apiVersion: ec2.aws.m.upbound.io/v1beta1
+kind: SecurityGroupEgressRule
+metadata:
+  name: inventory-api-outbound-https
+  namespace: inventory-network
+spec:
+  forProvider:
+    region: us-east-1
+    securityGroupIdRef:
+      name: inventory-api
+    description: HTTPS for updates and partner APIs
+    ipProtocol: tcp
+    fromPort: 443
+    toPort: 443
+    cidrIpv4: 0.0.0.0/0
